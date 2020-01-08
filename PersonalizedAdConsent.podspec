@@ -12,7 +12,7 @@ Forked to remove UIWebView and replace with WKWebView are per Apples policy anno
   s.source       = { :git => "https://github.com/Seoras/PersonalizedAdConsent.git", :tag => s.version }
   s.source_files  = "PersonalizedAdConsent/PersonalizedAdConsent/*.{h,m,bundle,html}"
   s.resource_bundles  = {
-   "<PersonalizedAdConsent>" => ["PersonalizedAdConsent/PersonalizedAdConsent/PersonalizedAdConsent.bundle/**/*.{html}"]
+   "PersonalizedAdConsent" => ["PersonalizedAdConsent/PersonalizedAdConsent/PersonalizedAdConsent.bundle/**/*.{html}"]
 }
   s.framework  = "UIKit"
   s.requires_arc = true
