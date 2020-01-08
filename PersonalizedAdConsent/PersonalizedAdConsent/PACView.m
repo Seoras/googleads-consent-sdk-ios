@@ -132,11 +132,11 @@ PACQueryParametersFromURL(NSURL *_Nonnull URL) {
   return parameterDictionary;
 }
 
-@interface PACView () <UIWebViewDelegate>
+@interface PACView () <WKNavigationDelegate>
 @end
 
 @implementation PACView {
-  UIWebView *_webView;
+  WKWebView *_webView;
   NSDictionary<PACFormKey, id> *_formInformation;
   PACLoadCompletion _loadCompletionHandler;
 }
@@ -147,8 +147,8 @@ PACQueryParametersFromURL(NSURL *_Nonnull URL) {
     self.backgroundColor = UIColor.clearColor;
     self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-    _webView = [[UIWebView alloc] initWithFrame:frame];
-    _webView.delegate = self;
+    _webView = [[WKWebView alloc] initWithFrame:frame];
+    _webView.navigationDelegate = self;
     _webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _webView.backgroundColor = UIColor.clearColor;
     _webView.opaque = NO;
@@ -295,26 +295,26 @@ PACQueryParametersFromURL(NSURL *_Nonnull URL) {
   return formStatus;
 }
 
-#pragma mark UIWebViewDelegate
+#pragma mark WKNavigationDelegate
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
+- (void) webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
   [self updateWebViewInformation];
 }
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+- (void) webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
   [self loadCompletedWithError:error];
 }
 
-- (BOOL)webView:(nonnull UIWebView *)webView
-    shouldStartLoadWithRequest:(nonnull NSURLRequest *)request
-                navigationType:(UIWebViewNavigationType)navigationType {
-  NSString *URLString = request.URL.absoluteString;
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction 
+  decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+  NSString *URLString = [navigationAction.request.URL absoluteString];
 
   if (![URLString hasPrefix:@"consent://"]) {
-    return YES;
+        decisionHandler(WKNavigationActionPolicyAllow);
+        return;
   }
 
-  NSDictionary<NSString *, NSString *> *parameters = PACQueryParametersFromURL(request.URL);
+  NSDictionary<NSString *, NSString *> *parameters = PACQueryParametersFromURL(navigationAction.request.URL);
   NSString *action = parameters[@"action"];
   NSCAssert(action.length > 0, @"Messages must have actions.");
 
@@ -345,7 +345,7 @@ PACQueryParametersFromURL(NSURL *_Nonnull URL) {
     }
   }
 
-  return NO;
+  decisionHandler(WKNavigationActionPolicyCancel);
 }
 
 @end
