@@ -222,7 +222,8 @@ PACQueryParametersFromURL(NSURL *_Nonnull URL) {
     NSString *command = PACCreateJavaScriptCommandString(@"setUpConsentDialog", @{
       @"info" : infoString
     });
-    [self->_webView stringByEvaluatingJavaScriptFromString:command];
+    [self->_webView evaluateJavaScript:command completionHandler:^(id something, NSError *error){
+        }];
   });
 }
 
